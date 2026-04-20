@@ -1,133 +1,133 @@
-# SOMEONE PLZZ TRY THE CODE IF IT WORKS TELL ME
+# MaxBay
 
-# How to run
-pip install requirements.text
+> If you try this project and it works (or breaks), please open an Issue with details.
 
-# Run
+## Quick Start
+
+### Requirements
+- Python 3.9+ recommended
+
+### Install
+```bash
+pip install -r requirements.txt
+```
+
+### Run
+```bash
 python app.py
+```
 
-# PLZZ MAKE ISSUE IF ANYTHING GOES WRONG
+## Troubleshooting / Support
+If anything goes wrong:
+1. Copy the full error message / stack trace
+2. Mention your OS + Python version
+3. Describe what you ran and what you expected to happen
+4. Open a GitHub Issue
 
+---
 
+# Training Process (Step-by-Step)
 
+This section explains what the training script is doing in simple terms.
 
-The Training Process: Step-by-Step
+## 1) Organizing the Study Materials
 
-1. Organizing the Study Materials
+**Code:** `load_dataset`, `train_test_split`
 
-The Code: load_dataset & train_test_split
+**What is this?**  
+We load the dataset and split it into two parts:
+- **90%** training data (what the model learns from)
+- **10%** test data (a “final exam”)
 
-What is this? We take our big pile of data and split it into two folders.
+**Goal:**  
+Make sure the model learns general patterns instead of memorizing the training set.
 
-The Goal: We give the AI 90% of the material to study. We keep 10% hidden. After the AI finishes studying, we use that secret 10% to give it a "final exam" to make sure it actually learned and didn't just memorize the answers.
+---
 
-2. Choosing the Student & the Translator
+## 2) Choosing the Student & the Translator
 
-The Code: AutoTokenizer & AutoModel
+**Code:** `AutoTokenizer`, `AutoModelForCausalLM`
 
-What is this? We pick our "student" (the AI brain) and a "translator."
+**What is this?**
+- **Tokenizer = Translator**: turns text into tokens (numbers)
+- **Model = Student**: the base language model you fine-tune (e.g., BLOOMZ)
 
-The Goal: AI brains don't read English; they read numbers. The Translator (Tokenizer) turns your words into code. It’s like translating a book into Morse code so a machine can process the signals.
+**Goal:**  
+Convert human text into a numeric format the model can learn from.
 
-3. Setting the Reading Rules
+---
 
-The Code: pad_token & eos_token
+## 3) Setting the Reading Rules
 
-What is this? We define where a sentence starts and where it ends.
+**Code:** `pad_token`, `eos_token`
 
-The Goal: Imagine reading a book with no punctuation. You wouldn't know where one thought ends and the next begins.
+**What is this?**
+- **EOS (End of Sentence)** tells the model when to stop.
+- **PAD (Padding)** makes all sequences the same length for batching.
 
-The "Stop" Sign: We add "End of Sentence" (EOS) markers so the AI knows when to stop talking.
+Common setting:
+- `tokenizer.pad_token = tokenizer.eos_token`
 
-The "Filler": We use "Padding" (PAD) to make all practice sentences the same length so the AI doesn't get confused by different page sizes.
+**Goal:**  
+Keep training stable and prevent the model from getting confused by variable-length inputs.
 
-4. Creating Study Flashcards
+---
 
-The Code: tokenize_function
+## 4) Creating Study Flashcards (Instruction → Response)
 
-What is this? We turn your data into a clear "Instruction & Response" format.
+**Code:** `tokenize_function`
 
-The Goal: This teaches the AI that its job is to be an assistant that follows orders. Every time it sees an instruction, it prepares a helpful answer.
+**What is this?**  
+We format each example like:
 
-🔍 Line-by-Line Breakdown (For Humans)
+```text
+Instruction: <your instruction>
+Response: <your response>
+```
 
-Here is exactly what those technical lines are doing in plain English:
+**Goal:**  
+Teach the model to behave like an assistant that follows instructions.
 
-The Code Line
+---
 
-What it's actually doing...
+# Line-by-Line Breakdown (Plain English)
 
-dataset = load_dataset(...)
+| Code | What it’s doing |
+|------|------------------|
+| `dataset = load_dataset(...)` | Loads your dataset so the model can read it |
+| `train_test_split(test_size=0.1)` | Holds out 10% for evaluation |
+| `AutoTokenizer.from_pretrained(...)` | Loads the tokenizer (“translator”) |
+| `AutoModelForCausalLM.from_pretrained(...)` | Loads the base model (“student”) |
+| `tokenizer.pad_token = tokenizer.eos_token` | Uses EOS as the padding token |
+| `f"Instruction: {inst}\nResponse: {resp}"` | Formats training examples consistently |
+| `padding="max_length", truncation=True` | Pads short inputs and truncates long inputs |
+| `result["labels"] = result["input_ids"].copy()` | Trains the model to predict the next tokens of the same text |
+| `per_device_train_batch_size=1` | Trains on 1 example per step (low memory) |
+| `gradient_accumulation_steps=4` | Accumulates 4 steps before updating weights |
+| `num_train_epochs=3` | Runs through the dataset 3 times |
+| `trainer.train()` | Starts training |
+| `trainer.save_model("fine_tuned_model")` | Saves the final fine-tuned model |
 
-Opening the book: Grabbing your data file so the AI can start reading.
+---
 
-train_test_split(test_size=0.1)
+## How do we know training worked?
 
-Saving some for the test: Keeping 10% of the pages aside for the final exam.
+During training you’ll see a metric called **loss**:
 
-AutoTokenizer.from_pretrained(...)
+- **High loss**: model is still confused / guessing
+- **Lower loss**: model is learning patterns and improving
 
-Hiring a Translator: Loading the tool that turns words into numbers.
+---
 
-AutoModelForCausalLM.from_pretrained(...)
+##  What do I do with the saved model?
 
-Choosing the Student: Picking the base AI brain (BLOOMZ) we want to train.
+After training finishes, you should see a folder called:
 
-tokenizer.pad_token = tokenizer.eos_token
+- `fine_tuned_model/`
 
-Making a "Stop" sign: Telling the AI that the sign for "End of Sentence" is also the sign for "Empty Space."
+This contains your fine-tuned model files. You can load that folder in another script to run inference and build a chatbot that responds the way you trained it.
 
-f"Instruction: {inst}\nResponse: {resp}"
+---
 
-Writing the Flashcard: Putting your raw data into a clear Question/Answer format.
-
-padding="max_length", truncation=True
-
-Trimming the pages: Cutting off sentences that are too long and adding "filler" to sentences that are too short so they are all the same size.
-
-result["labels"] = result["input_ids"].copy()
-
-Checking the Answer Key: Telling the AI that the words it's reading are the exact words it should learn to predict.
-
-per_device_train_batch_size=1
-
-One page at a time: Telling the AI not to try and read 100 pages at once so it doesn't get overwhelmed.
-
-gradient_accumulation_steps=4
-
-Taking Notes: The AI looks at 4 pages individually but only updates its "brain" after finishing all 4. This saves computer memory.
-
-num_train_epochs=3
-
-Triple-checking: Telling the AI to read the entire textbook 3 times from start to finish.
-
-trainer.train()
-
-Opening the classroom doors: This is the "Go" button that starts the actual learning process.
-
-trainer.save_model("fine_tuned_model")
-
-Graduation: Taking the finished "Smarter Brain" and putting it in a safe folder for you to use.
-
-📈 How do we know it worked?
-
-During the training, the computer will print out a number called Loss.
-
-High Loss: The AI is still confused and guessing randomly (like a student failing a quiz).
-
-Low Loss: The AI is starting to "get it" and its answers are becoming almost perfect.
-
-🚀 What do I do with the finished folder?
-
-Once the script finishes, you will see a new folder called fine_tuned_model.
-
-The Brain: Inside is the AI's new "knowledge."
-
-The Usage: You can load this folder into another script to build a chatbot that answers exactly how you taught it to in your data.
-
-The Result: You now have an AI that is no longer just "general," but is a specialist in your data!
-
-
-
-
-
+## Contribution
+Open for contribution 
