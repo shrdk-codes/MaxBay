@@ -1,12 +1,12 @@
-# Project MaxBay
+# SOMEONE PLZZ TRY THE CODE IF IT WORKS TELL ME
 
-A fine-tuned Baymax-style healthcare companion chatbot built on a causal language model.
+# How to run
+pip install requirements.text
 
+# Run
+python app.py
 
-
-# 1. Install dependencies
-
-pip install -r requirements.txt
+# PLZZ MAKE ISSUE IF ANYTHING GOES WRONG
 
 
 
