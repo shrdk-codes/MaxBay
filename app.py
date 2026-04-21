@@ -50,6 +50,7 @@ training_args = TrainingArguments(
     logging_steps=10,    # Add this
     save_strategy="epoch",
     # evaluation_strategy="epoch",  # Uncomment if you want eval
+    dataloader_pin_memory=torch.cuda.is_available(),  # Only pin memory when a GPU accelerator is available
 )
 
 # 7. Trainer without custom metrics (loss is automatically computed)
